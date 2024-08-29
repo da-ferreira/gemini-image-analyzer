@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { isBase64 } from '../utils/helpers';
 import measureModel from '../models/measure.model';
 
 class MeasureController {
@@ -17,7 +16,7 @@ class MeasureController {
     }
 
     // 👉 validando campos informados
-    if (typeof body.image !== 'string' || !isBase64(body.image)) {
+    if (typeof body.image !== 'string') {
       return res
         .status(400)
         .json({ error_code: 'INVALID_DATA', message: `Tipo inválido para 'image'. Deve ser uma string base64 válida` });
@@ -54,7 +53,9 @@ class MeasureController {
       return res.status(409).json({ error_code: 'DOUBLE_REPORT', message: `Leitura do mês já realizada` });
     }
 
-    
+    const measureValues = await measureModel.insert(body.image);
+
+    return res.status(200).json(measureValues);
   }
 
   async confirm(req: Request, res: Response) {

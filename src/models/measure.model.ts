@@ -1,4 +1,5 @@
 import { db } from '../config/database';
+import geminiService from '../services/gemini';
 
 class MeasureModel {
   async checkingReadingInTheMonth(customerCode: string, measureType: 'WATER' | 'GAS') {
@@ -9,7 +10,11 @@ class MeasureModel {
       .first();
   }
 
-  // async insert()
+  async insert(imageBase64: string) {
+    const measureValue = await geminiService.readMeasureFromImage(imageBase64);
+
+    return measureValue;
+  }
 }
 
 export default new MeasureModel();
