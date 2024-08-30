@@ -5,7 +5,7 @@
   "main": "http/server.ts",
   "scripts": {
     "dev": "tsx watch src/http/server.ts",
-    "start": "node index.js"
+    "start": "tsx src/http/server.ts"
   },
   "keywords": [],
   "author": "",
