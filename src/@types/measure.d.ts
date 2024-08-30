@@ -7,6 +7,14 @@ export interface MeasureProperties {
   measure_uuid: string;
 }
 
+export interface Measure {
+  image_url: string;
+  has_confirmed: string;
+  measure_datetime: string;
+  measure_type: 'WATER' | 'GAS';
+  measure_uuid: string;
+}
+
 export interface MeasureCreate {
   image: string;
   customerCode: string;

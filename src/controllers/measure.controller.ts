@@ -78,11 +78,54 @@ class MeasureController {
       measureUuid,
     });
 
-    return res.status(200).json(measureValues);
+    return res.status(200).json({ measure_value: measureValues, measure_uuid: measureUuid, image_url: imageUrl });
   }
 
   async confirm(req: Request, res: Response) {
-    //
+    const body = req.body;
+
+    const requiredFields = ['confirmed_value', 'measure_uuid'];
+    const missingFields = requiredFields.filter((field) => !body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error_code: 'INVALID_DATA',
+        message: `Campos obrigatórios não informados: ${missingFields.join(', ')}`,
+      });
+    }
+
+    const measure = await measureModel.getMeasureByUuid(body.measure_uuid);
+
+    if (!measure) {
+      return res.status(404).json({ error_code: 'MEASURE_NOT_FOUND', message: `Leitura não encontrada` });
+    }
+
+    if (measure.has_confirmed === 1) {
+      return res.status(409).json({ error_code: 'CONFIRMATION_DUPLICATE', message: `Leitura do mês já realizada` });
+    }
+
+    await measureModel.confirmMeasureValue(body.confirmed_value, body.measure_uuid);
+
+    return res.status(200).json({ success: true });
+  }
+
+  async listByCustomerCode(req: Request, res: Response) {
+    let measureType = req.query.measure_type;
+    measureType = measureType ? String(measureType) : undefined;
+    const validMeasureTypes = ['WATER', 'GAS'];
+    const customerCode = req.params.customerCode;
+
+    if (measureType && !validMeasureTypes.includes(String(measureType).toUpperCase())) {
+      return res.status(400).json({ error_code: 'INVALID_DATA', message: `Tipo de medição não permitida` });
+    }
+
+    const measures = await measureModel.listByCustomerCode(customerCode, measureType);
+
+    if (measures.length === 0) {
+      return res.status(404).json({ error_code: 'MEASURES_NOT_FOUND', message: `Nenhuma leitura encontrada` });
+    }
+
+    return res.status(200).json({ customer_code: customerCode, measures });
   }
 }
 

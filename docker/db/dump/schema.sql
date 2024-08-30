@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS `shopperdb`;
-USE `shopperdb`;
+CREATE DATABASE IF NOT EXISTS `shopperapp`;
+USE `shopperapp`;
 
 CREATE TABLE `measurements` (
 	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,

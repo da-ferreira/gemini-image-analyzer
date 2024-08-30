@@ -4,7 +4,8 @@
   "description": "",
   "main": "http/server.ts",
   "scripts": {
-    "dev": "tsx watch src/http/server.ts"
+    "dev": "tsx watch src/http/server.ts",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
