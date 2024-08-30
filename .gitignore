@@ -177,3 +177,4 @@ yarn-error.log*
 next-env.d.ts
 
 /docker/db/data
+uploads/.*

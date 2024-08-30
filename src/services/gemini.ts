@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GeminiRequestTextFromImage, GeminiResponse } from '../@types/gemini';
 
 class GeminiService {
-  async readMeasureFromImage(imageBase64: string) {
+  async readMeasureFromImage(params: GeminiRequestTextFromImage): Promise<GeminiResponse> {
     const apiKey = String(process.env.GEMINI_API_KEY);
     const genAI = new GoogleGenerativeAI(apiKey);
 
@@ -12,13 +13,15 @@ class GeminiService {
       topP: 0.95,
       topK: 64,
       maxOutputTokens: 8192,
-      responseMimeType: 'text/plain',
+      responseMimeType: 'application/json',
     };
 
-    const prompt = `A imagem a seguir, que está em base64, é um medidor de água ou de gás, pegue o número do medidor, apenas o número.`;
+    const waterOrGas = params.measureType === 'GAS' ? 'gás' : 'água';
+    const prompt = `A imagem a seguir, que está em base64, é um medidor de ${waterOrGas}, pegue o número do medidor, apenas o número.
+                    Me retorne apenas um json com a resposta: { measureValue: valor_da_medida }, se nao conseguir achar, insira null no valor`;
 
     const chatSession = model.startChat({
-      // generationConfig,
+      generationConfig,
       history: [
         {
           role: 'user',
@@ -27,11 +30,9 @@ class GeminiService {
       ],
     });
 
-    const result = await chatSession.sendMessage([imageBase64]);
+    const result = await chatSession.sendMessage([params.image]);
 
-    console.log(result.response.text())
-
-    return result.response.text();
+    return JSON.parse(result.response.text());
   }
 }
 

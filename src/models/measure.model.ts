@@ -1,3 +1,4 @@
+import { MeasureCreate, MeasureProperties } from '../@types/measure';
 import { db } from '../config/database';
 import geminiService from '../services/gemini';
 
@@ -10,8 +11,24 @@ class MeasureModel {
       .first();
   }
 
-  async insert(imageBase64: string) {
-    const measureValue = await geminiService.readMeasureFromImage(imageBase64);
+  async insert(params: MeasureCreate) {
+    const geminiResponse = await geminiService.readMeasureFromImage({
+      image: params.image,
+      measureType: params.measureType,
+    });
+
+    const measureValue = Number(geminiResponse.measureValue);
+
+    const newMeasure: MeasureProperties = {
+      customer_code: params.customerCode,
+      image_url: params.imageUrl,
+      measure_type: params.measureType,
+      measure_datetime: params.measureDatetime,
+      measure_value: measureValue,
+      measure_uuid: params.measureUuid,
+    };
+
+    await db('measurements').insert(newMeasure);
 
     return measureValue;
   }

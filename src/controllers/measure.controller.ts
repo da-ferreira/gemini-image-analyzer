@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import measureModel from '../models/measure.model';
+import fs from 'fs-extra';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 class MeasureController {
   async upload(req: Request, res: Response) {
@@ -53,7 +56,27 @@ class MeasureController {
       return res.status(409).json({ error_code: 'DOUBLE_REPORT', message: `Leitura do mês já realizada` });
     }
 
-    const measureValues = await measureModel.insert(body.image);
+    const measureUuid = uuidv4();
+
+    const mimeType = body.image.split(';')[0].split(':')[1];
+    const fileExtension = mimeType.split('/')[1];
+    const base64Data = body.image.replace(/^data:image\/\w+;base64,/, '');
+    const imageName = `${measureUuid}.${fileExtension}`;
+    const imagePath = path.join(__dirname, '..', 'uploads', imageName);
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+
+    await fs.outputFile(imagePath, imageBuffer);
+
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${imageName}`;
+
+    const measureValues = await measureModel.insert({
+      image: body.image,
+      measureDatetime: body.measure_datetime,
+      customerCode: body.customer_code,
+      measureType: body.measure_type.toUpperCase(),
+      imageUrl,
+      measureUuid,
+    });
 
     return res.status(200).json(measureValues);
   }
