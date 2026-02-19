@@ -38,7 +38,11 @@ class OpenAIService {
       return { measureValue: null };
     }
 
-    return JSON.parse(content);
+    try {
+      return JSON.parse(content);
+    } catch {
+      return { measureValue: null };
+    }
   }
 }
 
