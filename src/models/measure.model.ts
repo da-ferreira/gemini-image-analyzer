@@ -1,6 +1,6 @@
 import { Measure, MeasureCreate, MeasureProperties } from '../@types/measure';
 import { db } from '../config/database';
-import geminiService from '../services/gemini';
+import { getAIService } from '../services/ai-service-factory';
 
 class MeasureModel {
   async checkingReadingInTheMonth(customerCode: string, measureType: 'WATER' | 'GAS'): Promise<{ id: number }> {
@@ -22,12 +22,13 @@ class MeasureModel {
   }
 
   async insert(params: MeasureCreate) {
-    const geminiResponse = await geminiService.readMeasureFromImage({
+    const aiService = getAIService();
+    const aiResponse = await aiService.readMeasureFromImage({
       image: params.image,
       measureType: params.measureType,
     });
 
-    const measureValue = Number(geminiResponse.measureValue);
+    const measureValue = Number(aiResponse.measureValue);
 
     const newMeasure: MeasureProperties = {
       customer_code: params.customerCode,
